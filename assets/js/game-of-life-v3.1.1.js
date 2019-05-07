@@ -1,4 +1,4 @@
-/*jslint onevar: true, undef: false, nomen: true, eqeqeq: true, plusplus: false, bitwise: true, regexp: true, newcap: true, immed: true  */
+/* jslint onevar: true, undef: false, nomen: true, eqeqeq: true, plusplus: false, bitwise: true, regexp: true, newcap: true, immed: true  */
 
 /**
  * Game of Life - JS & CSS
@@ -7,9 +7,8 @@
  */
 
 (function () {
-
   var stats = new Stats();
-  stats.setMode( 0 ); // 0 FPS, 1 MS
+  stats.setMode(0); // 0 FPS, 1 MS
 
   // align top-left
   stats.domElement.style.position = 'absolute';
@@ -17,151 +16,201 @@
   stats.domElement.style.bottom = '0px';
   stats.domElement.style.zIndex = '-999999';
 
-  document.addEventListener("DOMContentLoaded", function() {
-    document.body.appendChild( stats.domElement );
+  document.addEventListener("DOMContentLoaded", function () {
+    document.body.appendChild(stats.domElement);
   });
 
   var GOL = {
 
-    columns : 0,
-    rows : 0,
+    columns: 0,
+    rows: 0,
 
     waitTime: 0,
-    generation : 0,
+    generation: 0,
 
-    running : false,
-    autoplay : false,
+    running: false,
+    autoplay: false,
 
 
     // Clear state
-    clear : {
-      schedule : false
+    clear: {
+      schedule: false,
     },
 
 
     // Average execution times
-    times : {
-      algorithm : 0,
-      gui : 0
+    times: {
+      algorithm: 0,
+      gui: 0,
     },
 
 
     // DOM elements
-    element : {
-      generation : null,
-      steptime : null,
-      livecells : null,
-      hint : null,
-      messages : {
-        layout : null
-      }
+    element: {
+      generation: null,
+      steptime: null,
+      livecells: null,
+      hint: null,
+      messages: {
+        layout: null,
+      },
     },
 
     // Initial state
-    initialState : '[{"39":[110]},{"40":[112]},{"41":[109,110,113,114,115]}]',
+    initialState: '[{"39":[110]},{"40":[112]},{"41":[109,110,113,114,115]}]',
 
     // Trail state
-    trail : {
+    trail: {
       current: true,
-      schedule : false
+      schedule: false,
     },
 
 
     // Grid style
-    grid : {
-      current : 0,
+    grid: {
+      current: 0,
 
-      schemes : [
-      {
-        color : '#F3F3F3'
-      },
+      schemes: [
+        {
+          color: '#F3F3F3',
+        },
 
-      {
-        color : '#FFFFFF'
-      },
+        {
+          color: '#FFFFFF',
+        },
 
-      {
-        color : '#666666'
-      },
+        {
+          color: '#666666',
+        },
 
-      {
-        color : '' // Special case: 0px grid
-      }
-      ]
+        {
+          color: '', // Special case: 0px grid
+        },
+      ],
     },
 
 
     // Zoom level
-    zoom : {
-      current : 0,
-      schedule : false,
+    zoom: {
+      current: 0,
+      schedule: false,
 
-      schemes : [
+      schemes: [
       // { columns : 100, rows : 48, cellSize : 8 },
-      {
-        columns : 180,
-        rows : 86,
-        cellSize : 4
-      },
+        {
+          columns: 180,
+          rows: 86,
+          cellSize: 4,
+        },
 
-      {
-        columns : 300,
-        rows : 144,
-        cellSize : 2
-      },
+        {
+          columns: 300,
+          rows: 144,
+          cellSize: 2,
+        },
 
-      {
-        columns : 450,
-        rows : 216,
-        cellSize : 1
-      }
-      ]
+        {
+          columns: 450,
+          rows: 216,
+          cellSize: 1,
+        },
+      ],
     },
 
 
     // Cell colors
-    colors : {
-      current : 0,
-      schedule : false,
+    colors: {
+      current: 0,
+      schedule: false,
 
-      schemes : [
-      {
-        dead : '#FFFFFF',
-        trail : ['#B5ECA2'],
-        alive : ['#9898FF', '#8585FF', '#7272FF', '#5F5FFF', '#4C4CFF', '#3939FF', '#2626FF', '#1313FF', '#0000FF', '#1313FF', '#2626FF', '#3939FF', '#4C4CFF', '#5F5FFF', '#7272FF', '#8585FF']
-      },
+      schemes: [
+        {
+          dead: '#FFFFFF',
+          trail: ['#B5ECA2'],
+          alive: [
+            '#9898FF',
+            '#8585FF',
+            '#7272FF',
+            '#5F5FFF',
+            '#4C4CFF',
+            '#3939FF',
+            '#2626FF',
+            '#1313FF',
+            '#0000FF',
+            '#1313FF',
+            '#2626FF',
+            '#3939FF',
+            '#4C4CFF',
+            '#5F5FFF',
+            '#7272FF',
+            '#8585FF',
+          ],
+        },
 
-      {
-        dead : '#FFFFFF',
-        trail : ['#EE82EE', '#FF0000', '#FF7F00', '#FFFF00', '#008000 ', '#0000FF', '#4B0082'],
-        alive : ['#FF0000', '#FF7F00', '#FFFF00', '#008000 ', '#0000FF', '#4B0082', '#EE82EE']
-      },
+        {
+          dead: '#FFFFFF',
+          trail: [
+            '#EE82EE',
+            '#FF0000',
+            '#FF7F00',
+            '#FFFF00',
+            '#008000 ',
+            '#0000FF',
+            '#4B0082',
+          ],
+          alive: [
+            '#FF0000',
+            '#FF7F00',
+            '#FFFF00',
+            '#008000 ',
+            '#0000FF',
+            '#4B0082',
+            '#EE82EE',
+          ],
+        },
 
-      {
-        dead : '#FFFFFF',
-        trail : ['#9898FF', '#8585FF', '#7272FF', '#5F5FFF', '#4C4CFF', '#3939FF', '#2626FF', '#1313FF', '#0000FF', '#1313FF', '#2626FF', '#3939FF', '#4C4CFF', '#5F5FFF', '#7272FF', '#8585FF'],
-        alive : ['#000000']
-      }
+        {
+          dead: '#FFFFFF',
+          trail: [
+            '#9898FF',
+            '#8585FF',
+            '#7272FF',
+            '#5F5FFF',
+            '#4C4CFF',
+            '#3939FF',
+            '#2626FF',
+            '#1313FF',
+            '#0000FF',
+            '#1313FF',
+            '#2626FF',
+            '#3939FF',
+            '#4C4CFF',
+            '#5F5FFF',
+            '#7272FF',
+            '#8585FF',
+          ],
+          alive: ['#000000'],
+        },
 
-      ]
+      ],
     },
 
 
     /**
          * On Load Event
          */
-    init : function() {
+    init: function () {
       try {
-        this.listLife.init();   // Reset/init algorithm
-        this.loadConfig();      // Load config from URL (autoplay, colors, zoom, ...)
-        this.loadState();       // Load state from URL
+        this.listLife.init(); // Reset/init algorithm
+        this.loadConfig(); // Load config from URL (autoplay, colors, zoom, ...)
+        this.loadState(); // Load state from URL
         this.keepDOMElements(); // Keep DOM References (getElementsById)
-        this.canvas.init();     // Init canvas GUI
-        this.registerEvents();  // Register event handlers
+        this.canvas.init(); // Init canvas GUI
+        this.registerEvents(); // Register event handlers
 
         this.prepare();
       } catch (e) {
-        alert("Error: "+e);
+        alert("Error: " + e);
       }
     },
 
@@ -169,8 +218,10 @@
     /**
          * Load config from URL
          */
-    loadConfig : function() {
-      var colors, grid, zoom;
+    loadConfig: function () {
+      var colors,
+        grid,
+        zoom;
 
       this.autoplay = this.helpers.getUrlParameter('autoplay') === '1' ? true : this.autoplay;
       this.trail.current = this.helpers.getUrlParameter('trail') === '1' ? true : this.trail.current;
@@ -205,10 +256,14 @@
     /**
          * Load world state from URL parameter
          */
-    loadState : function() {
-      var state, i, j, y, s = this.helpers.getUrlParameter('s');
+    loadState: function () {
+      var state,
+        i,
+        j,
+        y,
+        s = this.helpers.getUrlParameter('s');
 
-      if ( s === 'random') {
+      if (s === 'random') {
         this.randomState();
       } else {
         if (s == undefined) {
@@ -219,7 +274,7 @@
 
         for (i = 0; i < state.length; i++) {
           for (y in state[i]) {
-            for (j = 0 ; j < state[i][y].length ; j++) {
+            for (j = 0; j < state[i][y].length; j++) {
               this.listLife.addCell(state[i][y][j], parseInt(y, 10), this.listLife.actualState);
             }
           }
@@ -231,8 +286,9 @@
     /**
      * Create a random pattern
      */
-    randomState : function() {
-      var i, liveCells = (this.rows * this.columns) * 0.12;
+    randomState: function () {
+      var i,
+        liveCells = (this.rows * this.columns) * 0.12;
 
       for (i = 0; i < liveCells; i++) {
         this.listLife.addCell(this.helpers.random(0, this.columns - 1), this.helpers.random(0, this.rows - 1), this.listLife.actualState);
@@ -245,7 +301,7 @@
     /**
      * Clean up actual state and prepare a new run
      */
-    cleanUp : function() {
+    cleanUp: function () {
       this.listLife.init(); // Reset/init algorithm
       this.prepare();
     },
@@ -254,7 +310,7 @@
     /**
      * Prepare DOM elements and Canvas for a new run
      */
-    prepare : function() {
+    prepare: function () {
       this.generation = this.times.algorithm = this.times.gui = 0;
       this.mouseDown = this.clear.schedule = false;
 
@@ -276,12 +332,13 @@
      * keepDOMElements
      * Save DOM references for this session (one time execution)
      */
-    keepDOMElements : function() {
+    keepDOMElements: function () {
       this.element.generation = document.getElementById('generation');
       this.element.steptime = document.getElementById('steptime');
       this.element.livecells = document.getElementById('livecells');
       this.element.messages.layout = document.getElementById('layoutMessages');
       this.element.hint = document.getElementById('hint');
+      this.element.step = document.getElementById('buttonStep');
     },
 
 
@@ -289,10 +346,9 @@
      * registerEvents
      * Register event handlers for this session (one time execution)
      */
-    registerEvents : function() {
-
+    registerEvents: function () {
       // Keyboard Events
-      this.helpers.registerEvent(document.body, 'keyup', this.handlers.keyboard, false);
+      this.helpers.registerEvent(document.body, 'keydown', this.handlers.keyboard, false);
 
       // Controls
       this.helpers.registerEvent(document.getElementById('buttonRun'), 'click', this.handlers.buttons.run, false);
@@ -310,8 +366,14 @@
     /**
      * Run Next Step
      */
-    nextStep : function() {
-      var i, x, y, r, liveCellNumber, algorithmTime, guiTime;
+    nextStep: function () {
+      var i,
+        x,
+        y,
+        r,
+        liveCellNumber,
+        algorithmTime,
+        guiTime;
 
       // Algorithm run
 
@@ -366,10 +428,10 @@
       GOL.element.generation.innerHTML = GOL.generation;
       GOL.element.livecells.innerHTML = liveCellNumber;
 
-      r = 1.0/GOL.generation;
+      r = 1.0 / GOL.generation;
       GOL.times.algorithm = (GOL.times.algorithm * (1 - r)) + (algorithmTime * r);
       GOL.times.gui = (GOL.times.gui * (1 - r)) + (guiTime * r);
-      GOL.element.steptime.innerHTML = algorithmTime + ' / '+guiTime+' ('+Math.round(GOL.times.algorithm) + ' / '+Math.round(GOL.times.gui)+')';
+      GOL.element.steptime.innerHTML = algorithmTime + ' / ' + guiTime + ' (' + Math.round(GOL.times.algorithm) + ' / ' + Math.round(GOL.times.gui) + ')';
 
       // Flow Control
       if (GOL.running) {
@@ -379,8 +441,11 @@
           stats.end();
         }
 
-        if (GOL.waitTime > 0) setTimeout(function() { animateFrame() }, GOL.waitTime);
-        else animateFrame();
+        if (GOL.waitTime > 0) {
+          setTimeout(function () {
+            animateFrame()
+          }, GOL.waitTime);
+        } else animateFrame();
       } else {
         if (GOL.clear.schedule) {
           GOL.cleanUp();
@@ -392,17 +457,17 @@
     /** ****************************************************************************************************************************
      * Event Handlers
      */
-    handlers : {
+    handlers: {
 
-      mouseDown : false,
-      lastX : 0,
-      lastY : 0,
+      mouseDown: false,
+      lastX: 0,
+      lastY: 0,
 
 
       /**
        *
        */
-      canvasMouseDown : function(event) {
+      canvasMouseDown: function (event) {
         var position = GOL.helpers.mousePosition(event);
         GOL.canvas.switchCell(position[0], position[1]);
         GOL.handlers.lastX = position[0];
@@ -414,7 +479,7 @@
       /**
        *
        */
-      canvasMouseUp : function() {
+      canvasMouseUp: function () {
         GOL.handlers.mouseDown = false;
       },
 
@@ -422,7 +487,7 @@
       /**
        *
        */
-      canvasMouseMove : function(event) {
+      canvasMouseMove: function (event) {
         if (GOL.handlers.mouseDown) {
           var position = GOL.helpers.mousePosition(event);
           if ((position[0] !== GOL.handlers.lastX) || (position[1] !== GOL.handlers.lastY)) {
@@ -437,7 +502,7 @@
       /**
        *
        */
-      keyboard : function(e) {
+      keyboard: function (e) {
         var event = e;
         if (!event) {
           event = window.event;
@@ -445,28 +510,30 @@
 
         if (event.keyCode === 67) { // Key: C
           GOL.handlers.buttons.clear();
-        } else if (event.keyCode === 82 ) { // Key: R
+        } else if (event.keyCode === 82) { // Key: R
           GOL.handlers.buttons.run();
-        } else if (event.keyCode === 83 ) { // Key: S
+        } else if (event.keyCode === 83) { // Key: S
           GOL.handlers.buttons.step();
         }
       },
 
 
-      buttons : {
+      buttons: {
 
         /**
          * Button Handler - Run
          */
-        run : function() {
+        run: function () {
           GOL.element.hint.style.display = 'none';
 
           GOL.running = !GOL.running;
           if (GOL.running) {
             GOL.nextStep();
             document.getElementById('buttonRun').value = 'Stop';
+            GOL.element.step.style.display = 'none';
           } else {
             document.getElementById('buttonRun').value = 'Run';
+            GOL.element.step.style.display = '';
           }
         },
 
@@ -474,21 +541,20 @@
         /**
          * Button Handler - Next Step - One Step only
          */
-        step : function() {
-          if (!GOL.running) {
+        step: function () {
             GOL.nextStep();
-          }
         },
 
 
         /**
          * Button Handler - Clear World
          */
-        clear : function() {
+        clear: function () {
           if (GOL.running) {
             GOL.clear.schedule = true;
             GOL.running = false;
             document.getElementById('buttonRun').value = 'Run';
+            GOL.element.step.style.display = '';
           } else {
             GOL.cleanUp();
           }
@@ -498,7 +564,7 @@
         /**
          * Button Handler - Remove/Add Trail
          */
-        trail : function() {
+        trail: function () {
           GOL.element.messages.layout.innerHTML = GOL.trail.current ? 'Trail is Off' : 'Trail is On';
           GOL.trail.current = !GOL.trail.current;
           if (GOL.running) {
@@ -512,7 +578,7 @@
         /**
          *
          */
-        colors : function() {
+        colors: function () {
           GOL.colors.current = (GOL.colors.current + 1) % GOL.colors.schemes.length;
           GOL.element.messages.layout.innerHTML = 'Color Scheme #' + (GOL.colors.current + 1);
           if (GOL.running) {
@@ -526,7 +592,7 @@
         /**
          *
          */
-        grid : function() {
+        grid: function () {
           GOL.grid.current = (GOL.grid.current + 1) % GOL.grid.schemes.length;
           GOL.element.messages.layout.innerHTML = 'Grid Scheme #' + (GOL.grid.current + 1);
           if (GOL.running) {
@@ -540,14 +606,18 @@
         /**
          * Button Handler - Export State
          */
-        export_ : function() {
-          var i, j, url = '', cellState = '', params = '';
+        export_: function () {
+          var i,
+            j,
+            url = '',
+            cellState = '',
+            params = '';
 
           for (i = 0; i < GOL.listLife.actualState.length; i++) {
-            cellState += '{"'+GOL.listLife.actualState[i][0]+'":[';
-            //cellState += '{"one":[';
+            cellState += '{"' + GOL.listLife.actualState[i][0] + '":[';
+            // cellState += '{"one":[';
             for (j = 1; j < GOL.listLife.actualState[i].length; j++) {
-              cellState += GOL.listLife.actualState[i][j]+',';
+              cellState += GOL.listLife.actualState[i][j] + ',';
             }
             cellState = cellState.substring(0, cellState.length - 1) + ']},';
           }
@@ -562,15 +632,15 @@
             '&grid=' + (GOL.grid.current + 1) +
             '&colors=' + (GOL.colors.current + 1) +
             '&zoom=' + (GOL.zoom.current + 1) +
-            '&s=['+ cellState +']';
+            '&s=[' + cellState + ']';
 
             document.getElementById('exportUrlLink').href = params;
-            document.getElementById('exportTinyUrlLink').href = 'http://tinyurl.com/api-create.php?url='+ url + params;
+            document.getElementById('exportTinyUrlLink').href = 'http://tinyurl.com/api-create.php?url=' + url + params;
             document.getElementById('exportUrl').style.display = 'inline';
           }
-        }
+        },
 
-      }
+      },
 
     },
 
@@ -580,19 +650,18 @@
      */
     canvas: {
 
-      context : null,
-      width : null,
-      height : null,
-      age : null,
-      cellSize : null,
-      cellSpace : null,
+      context: null,
+      width: null,
+      height: null,
+      age: null,
+      cellSize: null,
+      cellSpace: null,
 
 
       /**
        * init
        */
-      init : function() {
-
+      init: function () {
         this.canvas = document.getElementById('canvas');
         this.context = this.canvas.getContext('2d');
 
@@ -610,8 +679,9 @@
       /**
        * clearWorld
        */
-      clearWorld : function () {
-        var i, j;
+      clearWorld: function () {
+        var i,
+          j;
 
         // Init ages (Canvas reference)
         this.age = [];
@@ -627,8 +697,9 @@
       /**
        * drawWorld
        */
-      drawWorld : function() {
-        var i, j;
+      drawWorld: function () {
+        var i,
+          j;
 
         // Special no grid case
         if (GOL.grid.schemes[GOL.grid.current].color === '') {
@@ -650,8 +721,8 @@
         this.context.fillStyle = GOL.grid.schemes[GOL.grid.current].color;
         this.context.fillRect(0, 0, this.width, this.height);
 
-        for (i = 0 ; i < GOL.columns; i++) {
-          for (j = 0 ; j < GOL.rows; j++) {
+        for (i = 0; i < GOL.columns; i++) {
+          for (j = 0; j < GOL.rows; j++) {
             if (GOL.listLife.isAlive(i, j)) {
               this.drawCell(i, j, true);
             } else {
@@ -665,7 +736,7 @@
       /**
        * setNoGridOn
        */
-      setNoGridOn : function() {
+      setNoGridOn: function () {
         this.cellSize = GOL.zoom.schemes[GOL.zoom.current].cellSize + 1;
         this.cellSpace = 0;
       },
@@ -674,7 +745,7 @@
       /**
        * setNoGridOff
        */
-      setNoGridOff : function() {
+      setNoGridOff: function () {
         this.cellSize = GOL.zoom.schemes[GOL.zoom.current].cellSize;
         this.cellSpace = 1;
       },
@@ -683,13 +754,11 @@
       /**
        * drawCell
        */
-      drawCell : function (i, j, alive) {
-
+      drawCell: function (i, j, alive) {
         if (alive) {
-
-          if (this.age[i][j] > -1)
+          if (this.age[i][j] > -1) {
             this.context.fillStyle = GOL.colors.schemes[GOL.colors.current].alive[this.age[i][j] % GOL.colors.schemes[GOL.colors.current].alive.length];
-
+          }
         } else {
           if (GOL.trail.current && this.age[i][j] < 0) {
             this.context.fillStyle = GOL.colors.schemes[GOL.colors.current].trail[(this.age[i][j] * -1) % GOL.colors.schemes[GOL.colors.current].trail.length];
@@ -699,18 +768,17 @@
         }
 
         this.context.fillRect(this.cellSpace + (this.cellSpace * i) + (this.cellSize * i), this.cellSpace + (this.cellSpace * j) + (this.cellSize * j), this.cellSize, this.cellSize);
-
       },
 
 
       /**
        * switchCell
        */
-      switchCell : function(i, j) {
-        if(GOL.listLife.isAlive(i, j)) {
+      switchCell: function (i, j) {
+        if (GOL.listLife.isAlive(i, j)) {
           this.changeCelltoDead(i, j);
           GOL.listLife.removeCell(i, j, GOL.listLife.actualState);
-        }else {
+        } else {
           this.changeCelltoAlive(i, j);
           GOL.listLife.addCell(i, j, GOL.listLife.actualState);
         }
@@ -720,8 +788,8 @@
       /**
        * keepCellAlive
        */
-      keepCellAlive : function(i, j) {
-        if (i >= 0 && i < GOL.columns && j >=0 && j < GOL.rows) {
+      keepCellAlive: function (i, j) {
+        if (i >= 0 && i < GOL.columns && j >= 0 && j < GOL.rows) {
           this.age[i][j]++;
           this.drawCell(i, j, true);
         }
@@ -731,8 +799,8 @@
       /**
        * changeCelltoAlive
        */
-      changeCelltoAlive : function(i, j) {
-        if (i >= 0 && i < GOL.columns && j >=0 && j < GOL.rows) {
+      changeCelltoAlive: function (i, j) {
+        if (i >= 0 && i < GOL.columns && j >= 0 && j < GOL.rows) {
           this.age[i][j] = 1;
           this.drawCell(i, j, true);
         }
@@ -742,12 +810,12 @@
       /**
        * changeCelltoDead
        */
-      changeCelltoDead : function(i, j) {
-        if (i >= 0 && i < GOL.columns && j >=0 && j < GOL.rows) {
+      changeCelltoDead: function (i, j) {
+        if (i >= 0 && i < GOL.columns && j >= 0 && j < GOL.rows) {
           this.age[i][j] = -this.age[i][j]; // Keep trail
           this.drawCell(i, j, false);
         }
-      }
+      },
 
     },
 
@@ -755,16 +823,16 @@
     /** ****************************************************************************************************************************
      *
      */
-    listLife : {
+    listLife: {
 
-      actualState : [],
-      redrawList : [],
+      actualState: [],
+      redrawList: [],
 
 
       /**
        *
        */
-      init : function () {
+      init: function () {
         this.actualState = [];
       },
 
@@ -798,8 +866,21 @@
 	  }
 	}
 	*/
-      nextGeneration : function() {
-        var x, y, i, j, m, n, key, t1, t2, alive = 0, neighbours, deadNeighbours, allDeadNeighbours = {}, newState = [];
+      nextGeneration: function () {
+        var x,
+          y,
+          i,
+          j,
+          m,
+          n,
+          key,
+          t1,
+          t2,
+          alive = 0,
+          neighbours,
+          deadNeighbours,
+          allDeadNeighbours = {},
+          newState = [];
         this.redrawList = [];
 
         for (i = 0; i < this.actualState.length; i++) {
@@ -811,7 +892,16 @@
             y = this.actualState[i][0];
 
             // Possible dead neighbours
-            deadNeighbours = [[x-1, y-1, 1], [x, y-1, 1], [x+1, y-1, 1], [x-1, y, 1], [x+1, y, 1], [x-1, y+1, 1], [x, y+1, 1], [x+1, y+1, 1]];
+            deadNeighbours = [
+              [x - 1, y - 1, 1],
+              [x, y - 1, 1],
+              [x + 1, y - 1, 1],
+              [x - 1, y, 1],
+              [x + 1, y, 1],
+              [x - 1, y + 1, 1],
+              [x, y + 1, 1],
+              [x + 1, y + 1, 1],
+            ];
 
             // Get number of live neighbours and remove alive neighbours from deadNeighbours
             neighbours = this.getNeighboursFromAlive(x, y, i, deadNeighbours);
@@ -858,36 +948,35 @@
       },
 
 
-      topPointer : 1,
-      middlePointer : 1,
-      bottomPointer : 1,
+      topPointer: 1,
+      middlePointer: 1,
+      bottomPointer: 1,
 
       /**
              *
              */
-      getNeighboursFromAlive : function (x, y, i, possibleNeighboursList) {
-        var neighbours = 0, k;
+      getNeighboursFromAlive: function (x, y, i, possibleNeighboursList) {
+        var neighbours = 0,
+          k;
 
         // Top
-        if (this.actualState[i-1] !== undefined) {
-          if (this.actualState[i-1][0] === (y - 1)) {
-            for (k = this.topPointer; k < this.actualState[i-1].length; k++) {
-
-              if (this.actualState[i-1][k] >= (x-1) ) {
-
-                if (this.actualState[i-1][k] === (x - 1)) {
+        if (this.actualState[i - 1] !== undefined) {
+          if (this.actualState[i - 1][0] === (y - 1)) {
+            for (k = this.topPointer; k < this.actualState[i - 1].length; k++) {
+              if (this.actualState[i - 1][k] >= (x - 1)) {
+                if (this.actualState[i - 1][k] === (x - 1)) {
                   possibleNeighboursList[0] = undefined;
                   this.topPointer = k + 1;
                   neighbours++;
                 }
 
-                if (this.actualState[i-1][k] === x) {
+                if (this.actualState[i - 1][k] === x) {
                   possibleNeighboursList[1] = undefined;
                   this.topPointer = k;
                   neighbours++;
                 }
 
-                if (this.actualState[i-1][k] === (x + 1)) {
+                if (this.actualState[i - 1][k] === (x + 1)) {
                   possibleNeighboursList[2] = undefined;
 
                   if (k == 1) {
@@ -899,7 +988,7 @@
                   neighbours++;
                 }
 
-                if (this.actualState[i-1][k] > (x + 1)) {
+                if (this.actualState[i - 1][k] > (x + 1)) {
                   break;
                 }
               }
@@ -910,7 +999,6 @@
         // Middle
         for (k = 1; k < this.actualState[i].length; k++) {
           if (this.actualState[i][k] >= (x - 1)) {
-
             if (this.actualState[i][k] === (x - 1)) {
               possibleNeighboursList[3] = undefined;
               neighbours++;
@@ -928,24 +1016,23 @@
         }
 
         // Bottom
-        if (this.actualState[i+1] !== undefined) {
-          if (this.actualState[i+1][0] === (y + 1)) {
-            for (k = this.bottomPointer; k < this.actualState[i+1].length; k++) {
-              if (this.actualState[i+1][k] >= (x - 1)) {
-
-                if (this.actualState[i+1][k] === (x - 1)) {
+        if (this.actualState[i + 1] !== undefined) {
+          if (this.actualState[i + 1][0] === (y + 1)) {
+            for (k = this.bottomPointer; k < this.actualState[i + 1].length; k++) {
+              if (this.actualState[i + 1][k] >= (x - 1)) {
+                if (this.actualState[i + 1][k] === (x - 1)) {
                   possibleNeighboursList[5] = undefined;
                   this.bottomPointer = k + 1;
                   neighbours++;
                 }
 
-                if (this.actualState[i+1][k] === x) {
+                if (this.actualState[i + 1][k] === x) {
                   possibleNeighboursList[6] = undefined;
                   this.bottomPointer = k;
                   neighbours++;
                 }
 
-                if (this.actualState[i+1][k] === (x + 1)) {
+                if (this.actualState[i + 1][k] === (x + 1)) {
                   possibleNeighboursList[7] = undefined;
 
                   if (k == 1) {
@@ -957,7 +1044,7 @@
                   neighbours++;
                 }
 
-                if (this.actualState[i+1][k] > (x + 1)) {
+                if (this.actualState[i + 1][k] > (x + 1)) {
                   break;
                 }
               }
@@ -972,8 +1059,9 @@
       /**
        *
        */
-      isAlive : function(x, y) {
-        var i, j;
+      isAlive: function (x, y) {
+        var i,
+          j;
 
         for (i = 0; i < this.actualState.length; i++) {
           if (this.actualState[i][0] === y) {
@@ -991,12 +1079,12 @@
       /**
        *
        */
-      removeCell : function(x, y, state) {
-        var i, j;
+      removeCell: function (x, y, state) {
+        var i,
+          j;
 
         for (i = 0; i < state.length; i++) {
           if (state[i][0] === y) {
-
             if (state[i].length === 2) { // Remove all Row
               state.splice(i, 1);
             } else { // Remove Element
@@ -1014,18 +1102,23 @@
       /**
        *
        */
-      addCell : function(x, y, state) {
+      addCell: function (x, y, state) {
         if (state.length === 0) {
           state.push([y, x]);
           return;
         }
 
-        var k, n, m, tempRow, newState = [], added;
+        var k,
+          n,
+          m,
+          tempRow,
+          newState = [],
+          added;
 
         if (y < state[0][0]) { // Add to Head
-          newState = [[y,x]];
+          newState = [[y, x]];
           for (k = 0; k < state.length; k++) {
-            newState[k+1] = state[k];
+            newState[k + 1] = state[k];
           }
 
           for (k = 0; k < newState.length; k++) {
@@ -1033,13 +1126,10 @@
           }
 
           return;
-
         } else if (y > state[state.length - 1][0]) { // Add to Tail
           state[state.length] = [y, x];
           return;
-
         } else { // Add to Middle
-
           for (n = 0; n < state.length; n++) {
             if (state[n][0] === y) { // Level Exists
               tempRow = [];
@@ -1063,12 +1153,12 @@
               newState = [];
               for (k = 0; k < state.length; k++) {
                 if (k === n) {
-                  newState[k] = [y,x];
-                  newState[k+1] = state[k];
+                  newState[k] = [y, x];
+                  newState[k + 1] = state[k];
                 } else if (k < n) {
                   newState[k] = state[k];
                 } else if (k > n) {
-                  newState[k+1] = state[k];
+                  newState[k + 1] = state[k];
                 }
               }
 
@@ -1080,7 +1170,7 @@
             }
           }
         }
-      }
+      },
 
     },
 
@@ -1088,14 +1178,14 @@
     /** ****************************************************************************************************************************
      *
      */
-    helpers : {
-      urlParameters : null, // Cache
+    helpers: {
+      urlParameters: null, // Cache
 
 
       /**
        * Return a random integer from [min, max]
        */
-      random : function(min, max) {
+      random: function (min, max) {
         return min <= max ? min + Math.round(Math.random() * (max - min)) : null;
       },
 
@@ -1103,9 +1193,11 @@
       /**
        * Get URL Parameters
        */
-      getUrlParameter : function(name) {
+      getUrlParameter: function (name) {
         if (this.urlParameters === null) { // Cache miss
-          var hash, hashes, i;
+          var hash,
+            hashes,
+            i;
 
           this.urlParameters = [];
           hashes = window.location.href.slice(window.location.href.indexOf('?') + 1).split('&');
@@ -1124,7 +1216,7 @@
       /**
        * Register Event
        */
-      registerEvent : function (element, event, handler, capture) {
+      registerEvent: function (element, event, handler, capture) {
         if (/msie/i.test(navigator.userAgent)) {
           element.attachEvent('on' + event, handler);
         } else {
@@ -1136,10 +1228,18 @@
       /**
        *
        */
-      mousePosition : function (e) {
+      mousePosition: function (e) {
         // http://www.malleus.de/FAQ/getImgMousePos.html
         // http://www.quirksmode.org/js/events_properties.html#position
-        var event, x, y, domObject, posx = 0, posy = 0, top = 0, left = 0, cellSize = GOL.zoom.schemes[GOL.zoom.current].cellSize + 1;
+        var event,
+          x,
+          y,
+          domObject,
+          posx = 0,
+          posy = 0,
+          top = 0,
+          left = 0,
+          cellSize = GOL.zoom.schemes[GOL.zoom.current].cellSize + 1;
 
         event = e;
         if (!event) {
@@ -1156,7 +1256,7 @@
 
         domObject = event.target || event.srcElement;
 
-        while ( domObject.offsetParent ) {
+        while (domObject.offsetParent) {
           left += domObject.offsetLeft;
           top += domObject.offsetTop;
           domObject = domObject.offsetParent;
@@ -1165,12 +1265,12 @@
         domObject.pageTop = top;
         domObject.pageLeft = left;
 
-        x = Math.ceil(((posx - domObject.pageLeft)/cellSize) - 1);
-        y = Math.ceil(((posy - domObject.pageTop)/cellSize) - 1);
+        x = Math.ceil(((posx - domObject.pageLeft) / cellSize) - 1);
+        y = Math.ceil(((posy - domObject.pageTop) / cellSize) - 1);
 
         return [x, y];
-      }
-    }
+      },
+    },
 
   };
 
@@ -1181,5 +1281,4 @@
   GOL.helpers.registerEvent(window, 'load', function () {
     GOL.init();
   }, false);
-
 }());
